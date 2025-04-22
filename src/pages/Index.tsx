@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +40,10 @@ const Index = () => {
         variant: "destructive",
       });
     },
-    removeAfterPrint: true
+    onAfterPrint: () => {
+      // Optional: Add any cleanup or post-print actions here
+      console.log('Printing completed');
+    }
   });
 
   const formatToRupiah = (amount: number | string) => {
