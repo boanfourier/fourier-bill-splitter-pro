@@ -32,7 +32,7 @@ const Index = () => {
 
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
-    content: () => printableRef.current, // Change 'printable' to 'content'
+    printable: () => printableRef.current!, // Change 'content' to 'printable'
     onBeforePrint: async () => {
       console.log('Before print');
       return Promise.resolve();
