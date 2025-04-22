@@ -32,6 +32,7 @@ const Index = () => {
 
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
+    content: () => printableRef.current, // Change 'printable' to 'content'
     onBeforePrint: async () => {
       console.log('Before print');
       return Promise.resolve();
@@ -44,7 +45,6 @@ const Index = () => {
       description: "Failed to print bill",
       variant: "destructive",
     }),
-    printable: () => printableRef.current,
   });
 
   const formatToRupiah = (amount: number | string) => {
