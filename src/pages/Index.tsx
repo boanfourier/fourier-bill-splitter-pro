@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,19 +31,25 @@ const Index = () => {
 
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
-    content: () => printableRef.current!, 
-    onBeforePrint: async () => {
-      console.log('Before print');
+    onBeforeGetContent: () => {
+      console.log('Getting content for print...');
       return Promise.resolve();
     },
-    onAfterPrint: () => {
-      console.log('After print');
+    onPrintError: () => {
+      toast({
+        title: "Print Error",
+        description: "Failed to print bill",
+        variant: "destructive",
+      });
     },
-    onPrintError: (error) => toast({
-      title: "Print Error",
-      description: "Failed to print bill",
-      variant: "destructive",
-    }),
+    removeAfterPrint: true,
+    print: (printIframe) => {
+      const document = printIframe.contentDocument;
+      if (document) {
+        document.title = "Bill Details";
+        window.print();
+      }
+    }
   });
 
   const formatToRupiah = (amount: number | string) => {
