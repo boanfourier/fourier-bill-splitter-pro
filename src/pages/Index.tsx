@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Calculator, Printer, HelpCircle } from "lucide-react";
+import { Plus, Trash2, Calculator, Download, HelpCircle } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { BillInfo } from "@/components/BillInfo";
 import { EmptyState } from "@/components/EmptyState";
@@ -11,6 +10,7 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PrintableTable } from "@/components/PrintableTable";
+import * as htmlToImage from 'html-to-image';
 
 interface BillItem {
   id: string;
@@ -28,21 +28,6 @@ const Index = () => {
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const printableRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    documentTitle: "Bill Details",
-    contentRef: printableRef,
-    onPrintError: () => {
-      toast({
-        title: "Print Error",
-        description: "Failed to print bill",
-        variant: "destructive",
-      });
-    },
-    onAfterPrint: () => {
-      console.log('Printing completed');
-    }
-  });
 
   const formatToRupiah = (amount: number | string) => {
     const number = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -205,6 +190,34 @@ const Index = () => {
     }
   };
 
+  const handleImageDownload = async () => {
+    if (printableRef.current) {
+      try {
+        const dataUrl = await htmlToImage.toPng(printableRef.current, {
+          quality: 1.0,
+          backgroundColor: 'white',
+        });
+        
+        const link = document.createElement('a');
+        link.download = 'bill-details.png';
+        link.href = dataUrl;
+        link.click();
+
+        toast({
+          title: "Success",
+          description: "Bill image has been downloaded",
+        });
+      } catch (error) {
+        console.error('Error generating image:', error);
+        toast({
+          title: "Download Error",
+          description: "Failed to download bill image",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 py-10">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -218,10 +231,10 @@ const Index = () => {
               <CardTitle className="text-2xl font-bold text-gray-800">Split Bill Machaa Pro</CardTitle>
               <Button
                 variant="outline"
-                onClick={() => handlePrint?.()}
+                onClick={handleImageDownload}
                 className="flex items-center gap-2"
               >
-                <Printer size={18} /> Print Bill
+                <Download size={18} /> Save as Image
               </Button>
             </div>
           </CardHeader>
