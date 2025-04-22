@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
@@ -29,7 +30,7 @@ export const PrintableTable = React.forwardRef<HTMLDivElement, PrintableTablePro
     };
 
     return (
-      <div ref={ref} className="p-8 bg-white relative min-h-[100vh]">
+      <div ref={ref} className="p-8 bg-white relative min-w-[800px] min-h-[600px]">
         <div className="flex items-center justify-center mb-6">
           <img 
             src="/lovable-uploads/0af8fa0e-21f6-4556-9fa4-13109f978c76.png" 
@@ -66,7 +67,6 @@ export const PrintableTable = React.forwardRef<HTMLDivElement, PrintableTablePro
           <p className="font-semibold">Discount: {discountPercentage}%</p>
         </div>
 
-        {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 rotate-[-30deg]">
           <div className="text-center">
             <img 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -193,15 +194,31 @@ const Index = () => {
   const handleImageDownload = async () => {
     if (printableRef.current) {
       try {
+        // Add a short delay to ensure the printable content is fully rendered
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Optimize image generation settings
         const dataUrl = await htmlToImage.toPng(printableRef.current, {
           quality: 1.0,
           backgroundColor: 'white',
+          pixelRatio: 2,
+          skipAutoScale: true,
+          canvasWidth: printableRef.current.offsetWidth * 2,
+          canvasHeight: printableRef.current.offsetHeight * 2,
+          style: {
+            margin: '0',
+            padding: '20px',
+          }
         });
         
+        // Create and trigger download
         const link = document.createElement('a');
-        link.download = 'bill-details.png';
+        link.download = `bill-details-${Date.now()}.png`;
         link.href = dataUrl;
+        link.style.display = 'none';
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
 
         toast({
           title: "Success",
@@ -211,7 +228,7 @@ const Index = () => {
         console.error('Error generating image:', error);
         toast({
           title: "Download Error",
-          description: "Failed to download bill image",
+          description: "Failed to download bill image. Please try again.",
           variant: "destructive",
         });
       }
