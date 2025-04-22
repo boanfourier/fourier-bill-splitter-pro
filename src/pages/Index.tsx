@@ -215,7 +215,7 @@ const Index = () => {
         <Card className="shadow-xl border-t-4 border-t-blue-500 overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-2xl font-bold text-gray-800">Split Bill MK 2</CardTitle>
+              <CardTitle className="text-2xl font-bold text-gray-800">Split Bill Machaa Pro</CardTitle>
               <Button
                 variant="outline"
                 onClick={() => handlePrint?.()}
