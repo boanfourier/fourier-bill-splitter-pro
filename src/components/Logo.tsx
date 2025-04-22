@@ -4,10 +4,12 @@ import React from 'react';
 export const Logo: React.FC = () => {
   return (
     <div className="flex items-center">
-      <div className="bg-gradient-to-r from-purple-600 to-blue-500 rounded-full h-12 w-12 flex items-center justify-center mr-3">
-        <span className="text-white font-bold text-xl">F</span>
-      </div>
-      <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">
+      <img 
+        src="/lovable-uploads/0af8fa0e-21f6-4556-9fa4-13109f978c76.png" 
+        alt="Fourier Project Logo" 
+        className="h-12 w-12 mr-3"
+      />
+      <h1 className="text-2xl font-bold text-gray-800">
         Fourier Project
       </h1>
     </div>

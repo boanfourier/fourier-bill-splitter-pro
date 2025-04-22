@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +40,6 @@ const Index = () => {
       });
     },
     onAfterPrint: () => {
-      // Optional: Add any cleanup or post-print actions here
       console.log('Printing completed');
     }
   });
@@ -111,7 +109,7 @@ const Index = () => {
     }
   };
 
-  const calculate = () => {
+  const calculate = async () => {
     if (items.length === 0) {
       toast({
         title: "No items added",
@@ -160,22 +158,6 @@ const Index = () => {
     setItems(updatedItems);
     calculateTotals();
     
-    toast({
-      title: "Calculation complete",
-      description: `Discount applied: ${discountPercentage.toFixed(2)}%`,
-    });
-  };
-
-  const saveBillToDatabase = async () => {
-    if (items.length === 0) {
-      toast({
-        title: "No items to save",
-        description: "Please add at least one item before saving",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsSaving(true);
 
@@ -191,7 +173,7 @@ const Index = () => {
 
       if (billError) throw billError;
 
-      const billItems = items.map(item => ({
+      const billItems = updatedItems.map(item => ({
         bill_id: billData.id,
         name: item.name,
         price: parseFloat(item.price) || 0,
@@ -207,8 +189,8 @@ const Index = () => {
       if (itemsError) throw itemsError;
 
       toast({
-        title: "Bill saved successfully",
-        description: "Your bill has been saved to the database",
+        title: "Bill saved automatically",
+        description: `Discount applied: ${discountPercentage.toFixed(2)}%`,
       });
 
     } catch (error) {
@@ -358,16 +340,6 @@ const Index = () => {
                 finalPrice={formatToRupiah(parseFloat(finalPrice) || 0)} 
                 discountPercentage={discountPercentage} 
               />
-              
-              <div className="mt-6">
-                <Button 
-                  onClick={saveBillToDatabase} 
-                  disabled={isSaving} 
-                  className="bg-green-500 hover:bg-green-600"
-                >
-                  {isSaving ? "Saving..." : "Save Bill to Database"}
-                </Button>
-              </div>
             </div>
           </CardContent>
         </Card>
