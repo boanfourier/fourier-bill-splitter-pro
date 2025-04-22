@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,16 +29,20 @@ const Index = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const printableRef = useRef<HTMLDivElement>(null);
 
-  // Fix: Properly implement useReactToPrint hook
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
+    onBeforePrint: () => {
+      console.log('Before print');
+    },
+    onAfterPrint: () => {
+      console.log('After print');
+    },
     onPrintError: (error) => toast({
       title: "Print Error",
       description: "Failed to print bill",
       variant: "destructive",
     }),
-    // Instead of content property, we'll use a function that returns the ref
-    content: () => printableRef.current,
+    printable: () => printableRef.current,
   });
 
   const formatToRupiah = (amount: number | string) => {
