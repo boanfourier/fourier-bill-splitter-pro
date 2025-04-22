@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,8 +32,9 @@ const Index = () => {
 
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
-    onBeforePrint: () => {
+    onBeforePrint: async () => {
       console.log('Before print');
+      return Promise.resolve();
     },
     onAfterPrint: () => {
       console.log('After print');
