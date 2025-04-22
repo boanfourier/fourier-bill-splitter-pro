@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +30,15 @@ const Index = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const printableRef = useRef<HTMLDivElement>(null);
 
+  // Fix: Properly implement useReactToPrint hook
   const handlePrint = useReactToPrint({
+    documentTitle: "Bill Details",
+    onPrintError: (error) => toast({
+      title: "Print Error",
+      description: "Failed to print bill",
+      variant: "destructive",
+    }),
+    // Instead of content property, we'll use a function that returns the ref
     content: () => printableRef.current,
   });
 
@@ -226,7 +235,7 @@ const Index = () => {
               <CardTitle className="text-2xl font-bold text-gray-800">Split Bill MK 2</CardTitle>
               <Button
                 variant="outline"
-                onClick={handlePrint}
+                onClick={() => handlePrint()}
                 className="flex items-center gap-2"
               >
                 <Printer size={18} /> Print Bill
