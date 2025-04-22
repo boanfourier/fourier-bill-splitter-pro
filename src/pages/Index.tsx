@@ -1,15 +1,16 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Calculator, HelpCircle } from "lucide-react";
+import { Plus, Trash2, Calculator, Printer, HelpCircle } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { BillInfo } from "@/components/BillInfo";
 import { EmptyState } from "@/components/EmptyState";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { PrintableTable } from "@/components/PrintableTable";
 
 interface BillItem {
   id: string;
@@ -26,13 +27,25 @@ const Index = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const printableRef = useRef<HTMLDivElement>(null);
 
-  // We'll start with empty state and let user add rows
+  const handlePrint = useReactToPrint({
+    content: () => printableRef.current,
+  });
+
+  const formatToRupiah = (amount: number | string) => {
+    const number = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(number);
+  };
+
   useEffect(() => {
-    // No auto-initialization anymore
   }, []);
 
-  // Calculate totals whenever items change
   useEffect(() => {
     calculateTotals();
   }, [items, finalPrice]);
@@ -61,7 +74,6 @@ const Index = () => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
           
-          // Calculate discounted price if price or discount has changed
           if (field === 'price' || field === 'discount') {
             const price = parseFloat(updatedItem.price) || 0;
             const discount = parseFloat(updatedItem.discount) || 0;
@@ -90,7 +102,6 @@ const Index = () => {
   };
 
   const calculate = () => {
-    // Check if there are any items
     if (items.length === 0) {
       toast({
         title: "No items added",
@@ -100,7 +111,6 @@ const Index = () => {
       return;
     }
 
-    // Check if all items have names and prices
     const invalidItems = items.filter(item => !item.name || !item.price);
     if (invalidItems.length > 0) {
       toast({
@@ -111,7 +121,6 @@ const Index = () => {
       return;
     }
 
-    // Check if final price is provided
     if (!finalPrice || parseFloat(finalPrice) <= 0) {
       toast({
         title: "Missing final price",
@@ -121,12 +130,10 @@ const Index = () => {
       return;
     }
 
-    // Recalculate all discounted prices based on the final price
     const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
     const finalPriceValue = parseFloat(finalPrice);
     const discountRatio = finalPriceValue / total;
 
-    // Update each item with proportional discount
     const updatedItems = items.map(item => {
       const originalPrice = parseFloat(item.price) || 0;
       const proportionalPrice = originalPrice * discountRatio;
@@ -150,7 +157,6 @@ const Index = () => {
   };
 
   const saveBillToDatabase = async () => {
-    // Check if there are items to save
     if (items.length === 0) {
       toast({
         title: "No items to save",
@@ -163,7 +169,6 @@ const Index = () => {
     try {
       setIsSaving(true);
 
-      // Insert the bill first
       const { data: billData, error: billError } = await supabase
         .from('bills')
         .insert({
@@ -176,7 +181,6 @@ const Index = () => {
 
       if (billError) throw billError;
 
-      // Insert all bill items with the bill id
       const billItems = items.map(item => ({
         bill_id: billData.id,
         name: item.name,
@@ -218,7 +222,16 @@ const Index = () => {
 
         <Card className="shadow-xl border-t-4 border-t-blue-500 overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
-            <CardTitle className="text-2xl font-bold text-center text-gray-800">Split Bill MK 2</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl font-bold text-gray-800">Split Bill MK 2</CardTitle>
+              <Button
+                variant="outline"
+                onClick={handlePrint}
+                className="flex items-center gap-2"
+              >
+                <Printer size={18} /> Print Bill
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-6">
             {items.length === 0 ? (
@@ -240,24 +253,11 @@ const Index = () => {
                     <thead>
                       <tr className="text-left border-b">
                         <th className="pb-2 w-[120px]"></th>
-                        <th className="pb-2 w-1/5">
-                          Item <span className="text-red-500">*</span>
-                        </th>
-                        <th className="pb-2">
-                          Price <span className="text-red-500">*</span>
-                        </th>
-                        <th className="pb-2">
-                          Discount
-                          <InfoTooltip content="Enter the discount amount for this item" />
-                        </th>
-                        <th className="pb-2">
-                          Discounted Price
-                          <InfoTooltip content="Original price minus discount" />
-                        </th>
-                        <th className="pb-2">
-                          Rounded Price
-                          <InfoTooltip content="Discounted price rounded to nearest 1000" />
-                        </th>
+                        <th className="pb-2 w-1/5">Item <span className="text-red-500">*</span></th>
+                        <th className="pb-2">Price <span className="text-red-500">*</span></th>
+                        <th className="pb-2">Discount</th>
+                        <th className="pb-2">Discounted Price</th>
+                        <th className="pb-2">Rounded Price</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -300,14 +300,14 @@ const Index = () => {
                           </td>
                           <td className="py-3 pr-2">
                             <Input
-                              value={item.discountedPrice || ""}
+                              value={formatToRupiah(item.discountedPrice)}
                               readOnly
                               className="bg-gray-50"
                             />
                           </td>
                           <td className="py-3">
                             <Input
-                              value={item.roundedPrice || ""}
+                              value={formatToRupiah(item.roundedPrice)}
                               readOnly
                               className="bg-gray-50"
                             />
@@ -344,8 +344,8 @@ const Index = () => {
               </div>
               
               <BillInfo 
-                totalPrice={totalPrice} 
-                finalPrice={finalPrice} 
+                totalPrice={formatToRupiah(totalPrice)} 
+                finalPrice={formatToRupiah(parseFloat(finalPrice) || 0)} 
                 discountPercentage={discountPercentage} 
               />
               
@@ -361,6 +361,16 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+        
+        <div style={{ display: 'none' }}>
+          <PrintableTable
+            ref={printableRef}
+            items={items}
+            totalPrice={totalPrice}
+            finalPrice={finalPrice}
+            discountPercentage={discountPercentage}
+          />
+        </div>
         
         <div className="text-center py-6 text-gray-500 text-sm">
           <p>© {new Date().getFullYear()} Fourier Project | Bill Splitter Pro</p>
