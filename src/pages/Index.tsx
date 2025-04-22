@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,7 @@ const Index = () => {
 
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
-    printable: () => printableRef.current!, // Change 'content' to 'printable'
+    content: () => printableRef.current!, 
     onBeforePrint: async () => {
       console.log('Before print');
       return Promise.resolve();
