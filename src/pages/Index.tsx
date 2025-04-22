@@ -198,10 +198,13 @@ const Index = () => {
           description: "Generating image, please wait...",
         });
         
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         const originalDisplay = printableRef.current.style.display;
+        const originalOverflow = document.body.style.overflow;
+        
         printableRef.current.style.display = 'block';
+        document.body.style.overflow = 'hidden';
         
         const dataUrl = await htmlToImage.toPng(printableRef.current, {
           quality: 1.0,
@@ -214,12 +217,15 @@ const Index = () => {
             transform: 'scale(1)',
             transformOrigin: 'top left',
             width: '800px',
-            height: '600px'
+            height: '600px',
+            overflow: 'hidden'
           },
           cacheBust: true,
+          imagePlaceholder: 'transparent',
         });
         
         printableRef.current.style.display = originalDisplay;
+        document.body.style.overflow = originalOverflow;
         
         const img = new Image();
         img.onload = () => {
@@ -381,7 +387,7 @@ const Index = () => {
           </CardContent>
         </Card>
         
-        <div style={{ position: 'fixed', left: '-9999px', top: '-9999px' }}>
+        <div style={{ position: 'fixed', left: '-9999px', top: '-9999px', overflow: 'hidden' }}>
           <PrintableTable
             ref={printableRef}
             items={items}

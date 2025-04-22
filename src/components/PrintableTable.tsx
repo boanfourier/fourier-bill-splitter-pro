@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BillItem {
   id: string;
@@ -37,7 +38,7 @@ export const PrintableTable = React.forwardRef<HTMLDivElement, PrintableTablePro
           width: '800px',
           height: '600px',
           boxSizing: 'border-box',
-          overflow: 'auto',
+          overflow: 'hidden', // Changed from 'auto' to 'hidden' to prevent scrollbars
           pageBreakInside: 'avoid',
           pageBreakAfter: 'always',
         }}
@@ -51,26 +52,28 @@ export const PrintableTable = React.forwardRef<HTMLDivElement, PrintableTablePro
           <h2 className="text-2xl font-bold">Bill Details</h2>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Item Name</TableHead>
-              <TableHead>Original Price</TableHead>
-              <TableHead>Discount</TableHead>
-              <TableHead>Final Price</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>{formatToRupiah(item.price)}</TableCell>
-                <TableCell>{formatToRupiah(item.discount)}</TableCell>
-                <TableCell>{formatToRupiah(item.discountedPrice)}</TableCell>
+        <div style={{ width: '100%', overflow: 'hidden' }}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Item Name</TableHead>
+                <TableHead>Original Price</TableHead>
+                <TableHead>Discount</TableHead>
+                <TableHead>Final Price</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{formatToRupiah(item.price)}</TableCell>
+                  <TableCell>{formatToRupiah(item.discount)}</TableCell>
+                  <TableCell>{formatToRupiah(item.discountedPrice)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
         <div className="mt-4 text-right">
           <p className="font-semibold">Total Price: {formatToRupiah(totalPrice)}</p>
