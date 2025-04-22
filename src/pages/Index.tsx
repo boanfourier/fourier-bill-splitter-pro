@@ -85,8 +85,8 @@ const Index = () => {
           if (field === 'price' || field === 'discount') {
             const price = parseFloat(updatedItem.price) || 0;
             const discount = parseFloat(updatedItem.discount) || 0;
-            updatedItem.discountedPrice = price - discount;
-            updatedItem.roundedPrice = Math.round(updatedItem.discountedPrice / 1000) * 1000;
+            const discountedAmount = price - discount;
+            updatedItem.discountedPrice = Math.ceil(discountedAmount / 100) * 100;
           }
           
           return updatedItem;
@@ -248,8 +248,7 @@ const Index = () => {
                         <th className="pb-2 w-1/5">Item <span className="text-red-500">*</span></th>
                         <th className="pb-2">Price <span className="text-red-500">*</span></th>
                         <th className="pb-2">Discount</th>
-                        <th className="pb-2">Discounted Price</th>
-                        <th className="pb-2">Rounded Price</th>
+                        <th className="pb-2">Final Price</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -290,16 +289,9 @@ const Index = () => {
                               type="number"
                             />
                           </td>
-                          <td className="py-3 pr-2">
-                            <Input
-                              value={formatToRupiah(item.discountedPrice)}
-                              readOnly
-                              className="bg-gray-50"
-                            />
-                          </td>
                           <td className="py-3">
                             <Input
-                              value={formatToRupiah(item.roundedPrice)}
+                              value={formatToRupiah(item.discountedPrice)}
                               readOnly
                               className="bg-gray-50"
                             />

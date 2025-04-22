@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
@@ -8,7 +7,6 @@ interface BillItem {
   price: string;
   discount: string;
   discountedPrice: number;
-  roundedPrice: number;
 }
 
 interface PrintableTableProps {
@@ -47,8 +45,7 @@ export const PrintableTable = React.forwardRef<HTMLDivElement, PrintableTablePro
               <TableHead>Item Name</TableHead>
               <TableHead>Original Price</TableHead>
               <TableHead>Discount</TableHead>
-              <TableHead>Discounted Price</TableHead>
-              <TableHead>Rounded Price</TableHead>
+              <TableHead>Final Price</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -58,7 +55,6 @@ export const PrintableTable = React.forwardRef<HTMLDivElement, PrintableTablePro
                 <TableCell>{formatToRupiah(item.price)}</TableCell>
                 <TableCell>{formatToRupiah(item.discount)}</TableCell>
                 <TableCell>{formatToRupiah(item.discountedPrice)}</TableCell>
-                <TableCell>{formatToRupiah(item.roundedPrice)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
