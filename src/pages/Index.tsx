@@ -31,6 +31,7 @@ const Index = () => {
 
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
+    content: () => printableRef.current,
     onBeforeGetContent: () => {
       console.log('Getting content for print...');
       return Promise.resolve();
@@ -42,14 +43,7 @@ const Index = () => {
         variant: "destructive",
       });
     },
-    removeAfterPrint: true,
-    print: (printIframe) => {
-      const document = printIframe.contentDocument;
-      if (document) {
-        document.title = "Bill Details";
-        window.print();
-      }
-    }
+    removeAfterPrint: true
   });
 
   const formatToRupiah = (amount: number | string) => {
@@ -245,7 +239,7 @@ const Index = () => {
               <CardTitle className="text-2xl font-bold text-gray-800">Split Bill MK 2</CardTitle>
               <Button
                 variant="outline"
-                onClick={() => handlePrint()}
+                onClick={handlePrint}
                 className="flex items-center gap-2"
               >
                 <Printer size={18} /> Print Bill
