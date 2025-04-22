@@ -8,6 +8,8 @@ import { Logo } from "@/components/Logo";
 import { BillInfo } from "@/components/BillInfo";
 import { EmptyState } from "@/components/EmptyState";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BillItem {
   id: string;
@@ -23,6 +25,7 @@ const Index = () => {
   const [finalPrice, setFinalPrice] = useState<string>("");
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // We'll start with empty state and let user add rows
   useEffect(() => {
@@ -87,8 +90,123 @@ const Index = () => {
   };
 
   const calculate = () => {
-    // Force recalculation
+    // Check if there are any items
+    if (items.length === 0) {
+      toast({
+        title: "No items added",
+        description: "Please add at least one item to calculate",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if all items have names and prices
+    const invalidItems = items.filter(item => !item.name || !item.price);
+    if (invalidItems.length > 0) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all item names and prices",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if final price is provided
+    if (!finalPrice || parseFloat(finalPrice) <= 0) {
+      toast({
+        title: "Missing final price",
+        description: "Please enter the final amount paid",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Recalculate all discounted prices based on the final price
+    const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+    const finalPriceValue = parseFloat(finalPrice);
+    const discountRatio = finalPriceValue / total;
+
+    // Update each item with proportional discount
+    const updatedItems = items.map(item => {
+      const originalPrice = parseFloat(item.price) || 0;
+      const proportionalPrice = originalPrice * discountRatio;
+      const discount = originalPrice - proportionalPrice;
+      
+      return {
+        ...item,
+        discount: discount.toFixed(2),
+        discountedPrice: proportionalPrice,
+        roundedPrice: Math.round(proportionalPrice / 1000) * 1000
+      };
+    });
+
+    setItems(updatedItems);
     calculateTotals();
+    
+    toast({
+      title: "Calculation complete",
+      description: `Discount applied: ${discountPercentage.toFixed(2)}%`,
+    });
+  };
+
+  const saveBillToDatabase = async () => {
+    // Check if there are items to save
+    if (items.length === 0) {
+      toast({
+        title: "No items to save",
+        description: "Please add at least one item before saving",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      // Insert the bill first
+      const { data: billData, error: billError } = await supabase
+        .from('bills')
+        .insert({
+          total_price: totalPrice,
+          final_price: parseFloat(finalPrice) || 0,
+          discount_percentage: discountPercentage
+        })
+        .select()
+        .single();
+
+      if (billError) throw billError;
+
+      // Insert all bill items with the bill id
+      const billItems = items.map(item => ({
+        bill_id: billData.id,
+        name: item.name,
+        price: parseFloat(item.price) || 0,
+        discount: parseFloat(item.discount) || 0,
+        discounted_price: item.discountedPrice,
+        rounded_price: item.roundedPrice
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('bill_items')
+        .insert(billItems);
+
+      if (itemsError) throw itemsError;
+
+      toast({
+        title: "Bill saved successfully",
+        description: "Your bill has been saved to the database",
+      });
+
+    } catch (error) {
+      console.error("Error saving bill:", error);
+      toast({
+        title: "Failed to save bill",
+        description: "There was an error saving your bill",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -208,7 +326,7 @@ const Index = () => {
                   Final Price <span className="text-red-500">*</span>
                   <InfoTooltip content="Enter the final amount paid (after all discounts were applied)" />
                 </label>
-                <div className="flex">
+                <div className="flex gap-2">
                   <Input
                     type="number"
                     value={finalPrice}
@@ -217,10 +335,10 @@ const Index = () => {
                     className="bg-blue-50"
                   />
                   <Button 
-                    className="ml-2 bg-blue-500 hover:bg-blue-600" 
+                    className="bg-blue-500 hover:bg-blue-600" 
                     onClick={calculate}
                   >
-                    <Calculator size={18} /> Calculate
+                    <Calculator size={18} className="mr-2" /> Calculate
                   </Button>
                 </div>
               </div>
@@ -230,6 +348,16 @@ const Index = () => {
                 finalPrice={finalPrice} 
                 discountPercentage={discountPercentage} 
               />
+              
+              <div className="mt-6">
+                <Button 
+                  onClick={saveBillToDatabase} 
+                  disabled={isSaving} 
+                  className="bg-green-500 hover:bg-green-600"
+                >
+                  {isSaving ? "Saving..." : "Save Bill to Database"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
