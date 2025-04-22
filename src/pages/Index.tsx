@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -194,41 +193,57 @@ const Index = () => {
   const handleImageDownload = async () => {
     if (printableRef.current) {
       try {
-        // Add a short delay to ensure the printable content is fully rendered
-        await new Promise(resolve => setTimeout(resolve, 100));
+        toast({
+          title: "Processing",
+          description: "Generating image, please wait...",
+        });
         
-        // Optimize image generation settings
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const originalDisplay = printableRef.current.style.display;
+        printableRef.current.style.display = 'block';
+        
         const dataUrl = await htmlToImage.toPng(printableRef.current, {
           quality: 1.0,
-          backgroundColor: 'white',
-          pixelRatio: 2,
-          skipAutoScale: true,
-          canvasWidth: printableRef.current.offsetWidth * 2,
-          canvasHeight: printableRef.current.offsetHeight * 2,
+          backgroundColor: '#ffffff',
+          pixelRatio: 3,
+          skipAutoScale: false,
+          width: 800,
+          height: 600,
           style: {
-            margin: '0',
-            padding: '20px',
-          }
+            transform: 'scale(1)',
+            transformOrigin: 'top left',
+            width: '800px',
+            height: '600px'
+          },
+          cacheBust: true,
         });
         
-        // Create and trigger download
-        const link = document.createElement('a');
-        link.download = `bill-details-${Date.now()}.png`;
-        link.href = dataUrl;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        toast({
-          title: "Success",
-          description: "Bill image has been downloaded",
-        });
+        printableRef.current.style.display = originalDisplay;
+        
+        const img = new Image();
+        img.onload = () => {
+          const link = document.createElement('a');
+          link.download = `bill-details-${Date.now()}.png`;
+          link.href = dataUrl;
+          link.click();
+          
+          toast({
+            title: "Success",
+            description: "Bill image has been downloaded successfully",
+          });
+        };
+        
+        img.onerror = () => {
+          throw new Error("Generated image is invalid");
+        };
+        
+        img.src = dataUrl;
       } catch (error) {
         console.error('Error generating image:', error);
         toast({
           title: "Download Error",
-          description: "Failed to download bill image. Please try again.",
+          description: "Failed to generate image. Please try again.",
           variant: "destructive",
         });
       }
@@ -366,7 +381,7 @@ const Index = () => {
           </CardContent>
         </Card>
         
-        <div style={{ display: 'none' }}>
+        <div style={{ position: 'fixed', left: '-9999px', top: '-9999px' }}>
           <PrintableTable
             ref={printableRef}
             items={items}

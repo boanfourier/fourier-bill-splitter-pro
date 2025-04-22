@@ -30,7 +30,18 @@ export const PrintableTable = React.forwardRef<HTMLDivElement, PrintableTablePro
     };
 
     return (
-      <div ref={ref} className="p-8 bg-white relative min-w-[800px] min-h-[600px]">
+      <div 
+        ref={ref} 
+        className="p-8 bg-white relative"
+        style={{ 
+          width: '800px',
+          height: '600px',
+          boxSizing: 'border-box',
+          overflow: 'auto',
+          pageBreakInside: 'avoid',
+          pageBreakAfter: 'always',
+        }}
+      >
         <div className="flex items-center justify-center mb-6">
           <img 
             src="/lovable-uploads/0af8fa0e-21f6-4556-9fa4-13109f978c76.png" 
