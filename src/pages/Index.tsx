@@ -32,10 +32,6 @@ const Index = () => {
   const handlePrint = useReactToPrint({
     documentTitle: "Bill Details",
     contentRef: printableRef,
-    onBeforeGetContent: () => {
-      console.log('Getting content for print...');
-      return Promise.resolve();
-    },
     onPrintError: () => {
       toast({
         title: "Print Error",
