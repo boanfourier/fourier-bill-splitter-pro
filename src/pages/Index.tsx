@@ -338,7 +338,7 @@ const Index = () => {
                           </td>
                           <td className="py-3 pr-2">
                             <Input
-                              className="bg-blue-50"
+                              className="bg-blue-50 text-right"
                               type="number"
                               value={item.price}
                               onChange={(e) => updateItem(item.id, "price", e.target.value)}
@@ -349,14 +349,14 @@ const Index = () => {
                             <Input
                               value={item.discount}
                               readOnly
-                              className="bg-gray-50"
+                              className="bg-gray-50 text-right"
                             />
                           </td>
                           <td className="py-3">
                             <Input
                               value={formatToRupiah(item.discountedPrice)}
                               readOnly
-                              className="bg-gray-50"
+                              className="bg-gray-50 text-right"
                             />
                           </td>
                         </tr>
@@ -368,39 +368,47 @@ const Index = () => {
             )}
 
             <div className="mt-8">
-              <div className="flex flex-col max-w-sm mb-6">
-                <label className="mb-2 text-sm font-medium flex items-center">
-                  Application Fee <span className="text-red-500">*</span>
-                  <InfoTooltip content="Input calculation of delivery and other(s) fee"/>
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                      type="number"
-                      value={fee}
-                      onChange={(e) => setFee(e.target.value)}
-                      className="bg-blue-50"
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="flex flex-col max-w-sm mb-6">
+                  <label className="mb-2 text-sm font-medium flex items-center">
+                    Application Fee <span className="text-red-500">*</span>
+                    <InfoTooltip content="Input calculation of delivery and other(s) fee"/>
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                        type="number"
+                        value={fee}
+                        onChange={(e) => setFee(e.target.value)}
+                        className="bg-blue-50 text-right"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col max-w-sm mb-6">
-                <label className="mb-2 text-sm font-medium flex items-center">
-                  Final Price <span className="text-red-500">*</span>
-                  <InfoTooltip content="Enter the final amount paid (after all discounts were applied)"/>
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                      type="number"
-                      value={finalPrice}
-                      onChange={(e) => setFinalPrice(e.target.value)}
-                      placeholder="Enter final amount paid"
-                      className="bg-blue-50"
-                  />
-                  <Button
-                      className="bg-blue-500 hover:bg-blue-600"
-                      onClick={calculate}
-                  >
-                    <Calculator size={18} className="mr-2"/> Calculate
-                  </Button>
+              
+                <div className="flex flex-col max-w-sm mb-6">
+                  <label className="mb-2 text-sm font-medium flex items-center">
+                    Final Price <span className="text-red-500">*</span>
+                    <InfoTooltip content="Enter the final amount paid (after all discounts were applied)"/>
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                        type="number"
+                        value={finalPrice}
+                        onChange={(e) => setFinalPrice(e.target.value)}
+                        placeholder="Enter final amount paid"
+                        className="bg-blue-50 text-right"
+                    />
+                  </div>
+                </div>
+              
+                <div className="flex flex-col max-w-sm mb-6">
+                  <label className="mb-2 text-sm text-transparent font-medium flex items-center">
+                    Calculation
+                  </label>
+                  <div className="flex gap-2">
+                    <Button className="bg-blue-500 hover:bg-blue-600" onClick={calculate}>
+                      <Calculator size={18} className="mr-2"/> Calculate
+                    </Button>
+                  </div>
                 </div>
               </div>
               
