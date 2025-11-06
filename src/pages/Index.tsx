@@ -23,6 +23,8 @@ interface BillItem {
 
 const Index = () => {
   const [items, setItems] = useState<BillItem[]>([]);
+  const [fee, setFee] = useState<string>("0");
+  const [splitFee, setSplitFee] = useState<number>(0);
   const [finalPrice, setFinalPrice] = useState<string>("");
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
@@ -70,7 +72,7 @@ const Index = () => {
           if (field === 'price' || field === 'discount') {
             const price = parseFloat(updatedItem.price) || 0;
             const discount = parseFloat(updatedItem.discount) || 0;
-            const discountedAmount = price - discount;
+            const discountedAmount = (price + splitFee) - discount;
             updatedItem.discountedPrice = Math.ceil(discountedAmount / 100) * 100;
           }
           
@@ -82,7 +84,7 @@ const Index = () => {
   };
 
   const calculateTotals = () => {
-    const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+    const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0) + parseFloat(fee);
     setTotalPrice(total);
     
     const finalPriceValue = parseFloat(finalPrice) || 0;
@@ -114,6 +116,15 @@ const Index = () => {
       return;
     }
 
+    if (!fee || parseFloat(fee) < 0) {
+      toast({
+        title: "Invalid Application Fee",
+        description: "Please input a valid Application Fee",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!finalPrice || parseFloat(finalPrice) <= 0) {
       toast({
         title: "Missing final price",
@@ -125,12 +136,14 @@ const Index = () => {
 
     const total = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
     const finalPriceValue = parseFloat(finalPrice);
-    const discountRatio = finalPriceValue / total;
+    const discountRatio = finalPriceValue / (total + parseFloat(fee));
+    const splitFee = parseFloat(fee) / items.length;
+    setSplitFee(splitFee);
 
     const updatedItems = items.map(item => {
       const originalPrice = parseFloat(item.price) || 0;
-      const proportionalPrice = originalPrice * discountRatio;
-      const discount = originalPrice - proportionalPrice;
+      const proportionalPrice = (originalPrice + splitFee) * discountRatio;
+      const discount = (originalPrice + splitFee) - proportionalPrice;
       
       return {
         ...item,
@@ -335,9 +348,8 @@ const Index = () => {
                           <td className="py-3 pr-2">
                             <Input
                               value={item.discount}
-                              onChange={(e) => updateItem(item.id, "discount", e.target.value)}
-                              placeholder="0"
-                              type="number"
+                              readOnly
+                              className="bg-gray-50"
                             />
                           </td>
                           <td className="py-3">
@@ -358,22 +370,36 @@ const Index = () => {
             <div className="mt-8">
               <div className="flex flex-col max-w-sm mb-6">
                 <label className="mb-2 text-sm font-medium flex items-center">
-                  Final Price <span className="text-red-500">*</span>
-                  <InfoTooltip content="Enter the final amount paid (after all discounts were applied)" />
+                  Application Fee <span className="text-red-500">*</span>
+                  <InfoTooltip content="Input calculation of delivery and other(s) fee"/>
                 </label>
                 <div className="flex gap-2">
                   <Input
-                    type="number"
-                    value={finalPrice}
-                    onChange={(e) => setFinalPrice(e.target.value)}
-                    placeholder="Enter final amount paid"
-                    className="bg-blue-50"
+                      type="number"
+                      value={fee}
+                      onChange={(e) => setFee(e.target.value)}
+                      className="bg-blue-50"
                   />
-                  <Button 
-                    className="bg-blue-500 hover:bg-blue-600" 
-                    onClick={calculate}
+                </div>
+              </div>
+              <div className="flex flex-col max-w-sm mb-6">
+                <label className="mb-2 text-sm font-medium flex items-center">
+                  Final Price <span className="text-red-500">*</span>
+                  <InfoTooltip content="Enter the final amount paid (after all discounts were applied)"/>
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                      type="number"
+                      value={finalPrice}
+                      onChange={(e) => setFinalPrice(e.target.value)}
+                      placeholder="Enter final amount paid"
+                      className="bg-blue-50"
+                  />
+                  <Button
+                      className="bg-blue-500 hover:bg-blue-600"
+                      onClick={calculate}
                   >
-                    <Calculator size={18} className="mr-2" /> Calculate
+                    <Calculator size={18} className="mr-2"/> Calculate
                   </Button>
                 </div>
               </div>
